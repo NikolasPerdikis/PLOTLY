@@ -1,0 +1,82 @@
+---
+title: "R Markdown and plotly"
+author: "Nikolaos Perdikis"
+date: "27 8 2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Import the data
+
+The source of the data is the latest unemployment survey of the European Statistics organization, known as Eurostat.  
+The link to the exact statistic is:  https://ec.europa.eu/eurostat/databrowser/view/tps00203/default/table?lang=en
+The CSV file is hosted in the Github repository of this presentation:
+
+The code for reading the CSV and the plotly graphics operations is:
+
+```{r load_library,echo=F,results='hide',message=F,warning=F}
+library(plotly)
+library(tidyr)
+library(dplyr)
+
+# EUROSTAT
+# Source: https://ec.europa.eu/eurostat/databrowser/view/tps00203/default/table?lang=en
+# Code: TPS00203   last update: 01/08/2019 23:00   
+
+tps_00203_csv <- "D:/Github/np_plotly/tps_00203.csv"
+tps_00203 <- read.csv(tps_00203_csv,header=FALSE,sep=",",col.names=c("cname","tps00203"),na.strings = ":")
+
+```
+
+## Unemployment in Europe 
+### (Eurostat, 2018)  
+
+```{r graph, warning=F,message=F}
+
+#Sys.setenv('MAPBOX_TOKEN'='pk.eyJ1IjoibnBlciIsImEiOiJjanp0aTYxZHkwMmIyM2NvYTZ0cnQycHNxIn0.OxDGGkBF4MeTiZhwHJpdbA')
+
+library(plotly)
+
+trace1 <- list(
+  geo = "geo", 
+  type = "choropleth", 
+  z = tps_00203$tps00203, 
+  showscale = TRUE, 
+  locationmode = "country names", 
+  locations = tps_00203$cname, 
+  colors = 'Blues'
+)
+data <- list(trace1)
+
+
+layout <- list(
+  geo = list(
+    scope = "europe", 
+    domain = list(
+      x = c(0, 1), 
+      y = c(0, 1)
+    ), 
+    lataxis = list(range = c(35.0, 70.0)), 
+    lonaxis = list(range = c(-9.0, 38.0)), 
+    showland = TRUE, 
+    landcolor = "rgb(229, 229, 229)", 
+    showframe = TRUE, 
+    projection = list(type = "Mercator"), 
+    resolution = 50, 
+    countrycolor = "rgb(255, 0, 255)", 
+    coastlinecolor = "rgb(128, 128, 128)", 
+    showcoastlines = TRUE
+  ), 
+  title = "Hover mouse over country to see name and rate", 
+  legend = list(traceorder = "reversed")
+)
+p <- plot_ly()
+p <- add_trace(p, geo=trace1$geo, type=trace1$type, z=trace1$z, showscale=trace1$showscale, locationmode=trace1$locationmode, locations=trace1$locations, autocolorscale=trace1$autocolorscale)
+p <- layout(p, geo=layout$geo, title=layout$title, legend=layout$legend)
+p
+```
+
+## Thank you!
